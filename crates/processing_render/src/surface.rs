@@ -391,7 +391,6 @@ pub fn destroy(
     }
 }
 
-/// Update window size when resized.
 pub fn resize(
     In((window_entity, width, height)): In<(Entity, u32, u32)>,
     mut windows: Query<&mut Window>,
