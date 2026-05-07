@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use crate::compute::{Buffer, Compute};
 use crate::graphics::Geometry;
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum AttributeFormat {
     Float = 1,
@@ -48,7 +48,7 @@ impl AttributeFormat {
 
 /// named typed attribute. use the `position()`/`color()`/etc. classmethods for
 /// builtins or `Attribute(name, format)` for custom ones.
-#[pyclass(unsendable, frozen, hash, eq)]
+#[pyclass(unsendable, frozen, hash, eq, from_py_object)]
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Attribute {
     pub(crate) entity: Entity,

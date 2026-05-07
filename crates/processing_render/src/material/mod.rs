@@ -196,14 +196,14 @@ impl MaterialExtension for ProcessingMaterial {
         _layout: &MeshVertexBufferLayoutRef,
         key: MaterialExtensionKey<Self>,
     ) -> std::result::Result<(), SpecializedMeshPipelineError> {
-        if let Some(blend_state) = key.bind_group_data.blend_state {
-            if let Some(fragment_state) = &mut descriptor.fragment {
-                fragment_state.targets.iter_mut().for_each(|target| {
-                    if let Some(target) = target {
-                        target.blend = Some(blend_state);
-                    }
-                });
-            }
+        if let Some(blend_state) = key.bind_group_data.blend_state
+            && let Some(fragment_state) = &mut descriptor.fragment
+        {
+            fragment_state.targets.iter_mut().for_each(|target| {
+                if let Some(target) = target {
+                    target.blend = Some(blend_state);
+                }
+            });
         }
         Ok(())
     }
