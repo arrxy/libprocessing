@@ -1,4 +1,4 @@
-//! GPU-resident particle / instancing container. See `docs/particles.md`.
+//! gpu-resident particle / instancing container. See `docs/particles.md`.
 
 pub mod kernels;
 pub mod material;
@@ -34,11 +34,11 @@ pub struct Particles {
     pub capacity: u32,
     /// `Attribute` entity → backing `compute::Buffer` entity.
     pub buffers: HashMap<Entity, Entity>,
-    /// Lazy persistent rasterization entity. Must outlive the per-frame draw
+    /// lazy persistent rasterization entity. Must outlive the per-frame draw
     /// because `GpuInstanceBatchReservations` queue mesh batches one frame
     /// behind, so respawning per-frame loses the reservation.
     pub draw_entity: Option<Entity>,
-    /// Ring-buffer write cursor for `particles_emit`. Wraps at `capacity`.
+    /// ring-buffer write cursor for `particles_emit`. Wraps at `capacity`.
     pub emit_head: u32,
 }
 
@@ -48,7 +48,7 @@ impl Particles {
     }
 }
 
-/// Render-side marker pointing at the [`Particles`] entity to pack from.
+/// render-side marker pointing at the [`Particles`] entity to pack from.
 #[derive(Component, Clone, Copy)]
 pub struct ParticlesDraw {
     pub particles: Entity,
@@ -87,7 +87,7 @@ pub fn create(
     Ok(entity)
 }
 
-/// Capacity = source mesh's vertex count. Registered attributes are seeded
+/// capacity = source mesh's vertex count. Registered attributes are seeded
 /// from the matching mesh attribute (by name + format); unmatched ones are
 /// zero-initialized.
 pub fn create_from_geometry(

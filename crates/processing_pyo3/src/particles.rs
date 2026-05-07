@@ -1,6 +1,6 @@
 use bevy::prelude::Entity;
 use processing::prelude::*;
-use processing_render::geometry as geometry;
+use processing_render::geometry;
 use pyo3::types::PyDict;
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
 use std::collections::HashMap;
@@ -8,7 +8,6 @@ use std::collections::HashMap;
 use crate::compute::{Buffer, Compute};
 use crate::graphics::Geometry;
 
-/// Per-element format for an attribute.
 #[pyclass(eq, eq_int)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum AttributeFormat {
@@ -47,7 +46,7 @@ impl AttributeFormat {
     }
 }
 
-/// Named typed attribute. Use the `position()`/`color()`/etc. classmethods for
+/// named typed attribute. use the `position()`/`color()`/etc. classmethods for
 /// builtins or `Attribute(name, format)` for custom ones.
 #[pyclass(unsendable, frozen, hash, eq)]
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -65,19 +64,47 @@ impl Attribute {
     }
 
     #[staticmethod]
-    pub fn position() -> Self { Self { entity: geometry_attribute_position() } }
+    pub fn position() -> Self {
+        Self {
+            entity: geometry_attribute_position(),
+        }
+    }
     #[staticmethod]
-    pub fn normal() -> Self { Self { entity: geometry_attribute_normal() } }
+    pub fn normal() -> Self {
+        Self {
+            entity: geometry_attribute_normal(),
+        }
+    }
     #[staticmethod]
-    pub fn color() -> Self { Self { entity: geometry_attribute_color() } }
+    pub fn color() -> Self {
+        Self {
+            entity: geometry_attribute_color(),
+        }
+    }
     #[staticmethod]
-    pub fn uv() -> Self { Self { entity: geometry_attribute_uv() } }
+    pub fn uv() -> Self {
+        Self {
+            entity: geometry_attribute_uv(),
+        }
+    }
     #[staticmethod]
-    pub fn rotation() -> Self { Self { entity: geometry_attribute_rotation() } }
+    pub fn rotation() -> Self {
+        Self {
+            entity: geometry_attribute_rotation(),
+        }
+    }
     #[staticmethod]
-    pub fn scale() -> Self { Self { entity: geometry_attribute_scale() } }
+    pub fn scale() -> Self {
+        Self {
+            entity: geometry_attribute_scale(),
+        }
+    }
     #[staticmethod]
-    pub fn dead() -> Self { Self { entity: geometry_attribute_dead() } }
+    pub fn dead() -> Self {
+        Self {
+            entity: geometry_attribute_dead(),
+        }
+    }
 
     #[getter]
     pub fn name(&self) -> PyResult<String> {
@@ -97,12 +124,14 @@ impl Attribute {
 #[pyclass(unsendable)]
 pub struct Particles {
     pub(crate) entity: Entity,
-    // name → (entity, format), used by `emit(**kwargs)` to route kwargs and pack bytes
+    // name → (entity, format); used by `emit(**kwargs)` to route kwargs and pack bytes
     name_to_attr: HashMap<String, (Entity, AttributeFormat)>,
 }
 
 impl Particles {
-    fn build_name_index(attrs: &[Attribute]) -> PyResult<HashMap<String, (Entity, AttributeFormat)>> {
+    fn build_name_index(
+        attrs: &[Attribute],
+    ) -> PyResult<HashMap<String, (Entity, AttributeFormat)>> {
         let mut map = HashMap::with_capacity(attrs.len());
         for attr in attrs {
             let (name, fmt) = geometry_attribute_info(attr.entity)
@@ -115,7 +144,7 @@ impl Particles {
 
 #[pymethods]
 impl Particles {
-    /// Pass `capacity` for empty buffers, or `geometry` to seed from a source mesh.
+    /// pass `capacity` for empty buffers, or `geometry` to seed from a source mesh.
     #[new]
     #[pyo3(signature = (capacity=None, attributes=None, geometry=None))]
     pub fn new(
@@ -158,7 +187,7 @@ impl Particles {
         particles_capacity(self.entity).map_err(|e| PyRuntimeError::new_err(format!("{e}")))
     }
 
-    /// Backing `Buffer` for a registered attribute, or `None` if not registered.
+    /// backing `Buffer` for a registered attribute, or `None` if not registered.
     pub fn buffer(&self, attribute: &Attribute) -> PyResult<Option<Buffer>> {
         let buf = particles_buffer(self.entity, attribute.entity)
             .map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
@@ -173,14 +202,10 @@ impl Particles {
         Ok(buf.map(|e| Buffer::from_entity(e, Some(element_type))))
     }
 
-    /// Dispatch a compute kernel against these particles' buffers. Buffers are
+    /// dispatch a compute kernel against these particles' buffers. buffers are
     /// auto-bound by attribute name; kwargs are forwarded to `compute.set(...)`.
     #[pyo3(signature = (compute, **kwargs))]
-    pub fn apply(
-        &self,
-        compute: &Compute,
-        kwargs: Option<&Bound<'_, PyDict>>,
-    ) -> PyResult<()> {
+    pub fn apply(&self, compute: &Compute, kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<()> {
         if let Some(kwargs) = kwargs {
             compute.set(Some(kwargs))?;
         }
@@ -188,7 +213,7 @@ impl Particles {
             .map_err(|e| PyRuntimeError::new_err(format!("{e}")))
     }
 
-    /// Emit `n` particles into the next ring-buffer slots. Per-attribute data
+    /// emit `n` particles into the next ring-buffer slots. per-attribute data
     /// is a kwarg keyed by attribute name; each value is a flat list of
     /// `n * format.float_count()` floats.
     #[pyo3(signature = (n, **kwargs))]
@@ -218,11 +243,10 @@ impl Particles {
             let bytes: Vec<u8> = floats.iter().flat_map(|f| f.to_le_bytes()).collect();
             data.push((attr_entity, bytes));
         }
-        particles_emit(self.entity, n, data)
-            .map_err(|e| PyRuntimeError::new_err(format!("{e}")))
+        particles_emit(self.entity, n, data).map_err(|e| PyRuntimeError::new_err(format!("{e}")))
     }
 
-    /// Emit `n` particles via a GPU kernel. Auto-binds buffers and an
+    /// emit `n` particles via a GPU kernel. auto-binds buffers and an
     /// `emit_range: vec4<f32> = (base_slot, n, capacity, 0)` uniform.
     pub fn emit_gpu(&self, n: u32, compute: &Compute) -> PyResult<()> {
         particles_emit_gpu(self.entity, n, compute.entity)
@@ -236,15 +260,16 @@ impl Drop for Particles {
     }
 }
 
-/// Built-in noise kernel. Uniforms: `scale`, `strength`, `time`.
+/// built-in noise kernel. uniforms: `scale`, `strength`, `time`.
 pub fn kernel_noise() -> PyResult<Compute> {
     let entity = particles_kernel_noise().map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
     Ok(Compute::from_entity(entity))
 }
 
-/// Built-in transform kernel: scale → axis-angle rotate → translate. Uniforms:
+/// built-in transform kernel: scale → axis-angle rotate → translate. uniforms:
 /// `translate: vec3`, `rotation_axis: vec3`, `rotation_angle: f32`, `scale: vec3`.
 pub fn kernel_transform() -> PyResult<Compute> {
-    let entity = particles_kernel_transform().map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
+    let entity =
+        particles_kernel_transform().map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
     Ok(Compute::from_entity(entity))
 }

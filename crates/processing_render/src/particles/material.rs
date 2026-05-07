@@ -1,4 +1,4 @@
-//! Per-particle albedo on top of `StandardMaterial`. The `unlit` flag on the
+//! per-particle albedo on top of `StandardMaterial`. the `unlit` flag on the
 //! base material toggles between lit and unlit; `apply_pbr_lighting`
 //! short-circuits when set.
 
@@ -39,12 +39,9 @@ impl MaterialExtension for ParticlesExtension {
     }
 }
 
-/// Promote `UntypedMaterial(handle)` to `MeshMaterial3d<ParticlesMaterial>`
-/// where the handle's type matches. Sibling of `add_processing_materials`.
-pub fn add_particles_materials(
-    mut commands: Commands,
-    meshes: Query<(Entity, &UntypedMaterial)>,
-) {
+/// promote `UntypedMaterial(handle)` to `MeshMaterial3d<ParticlesMaterial>`
+/// where the handle's type matches.
+pub fn add_particles_materials(mut commands: Commands, meshes: Query<(Entity, &UntypedMaterial)>) {
     for (entity, handle) in meshes.iter() {
         let handle = handle.deref().clone();
         if let Ok(handle) = handle.try_typed::<ParticlesMaterial>() {

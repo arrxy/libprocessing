@@ -3,7 +3,6 @@
 pub mod camera;
 pub mod color;
 pub mod compute;
-pub mod particles;
 pub mod geometry;
 pub mod gltf;
 pub mod graphics;
@@ -11,6 +10,7 @@ pub mod image;
 pub mod light;
 pub mod material;
 pub mod monitor;
+pub mod particles;
 pub mod render;
 pub mod shader_value;
 pub mod sketch;
@@ -1404,7 +1404,7 @@ pub fn geometry_sphere(radius: f32, sectors: u32, stacks: u32) -> error::Result<
     })
 }
 
-/// 3D lattice of `nx * ny * nz` `PointList` vertices centered at the origin,
+/// 3d lattice of `nx * ny * nz` `PointList` vertices centered at the origin,
 /// `spacing` units apart. Intended as a position source for
 /// [`particles_create_from_geometry`].
 pub fn geometry_grid(nx: u32, ny: u32, nz: u32, spacing: f32) -> error::Result<Entity> {
@@ -1433,7 +1433,7 @@ pub fn shader_create(source: &str) -> error::Result<Entity> {
     })
 }
 
-/// Load a shader. Accepts either an asset-relative path (`"shaders/foo.wgsl"`)
+/// load a shader. Accepts either an asset-relative path (`"shaders/foo.wgsl"`)
 /// or a URL-scheme asset path (`"embedded://crate/file.wgsl"`).
 pub fn shader_load(path: &str) -> error::Result<Entity> {
     let path = path.to_string();
@@ -1476,14 +1476,14 @@ pub fn material_create_unlit() -> error::Result<Entity> {
     Ok(entity)
 }
 
-/// Set the albedo source to a constant srgba color. If the material is
+/// set the albedo source to a constant srgba color. If the material is
 /// currently buffer-backed, swaps the asset back to plain PBR while
 /// preserving every other `StandardMaterial` field.
 pub fn material_set_albedo_color(entity: Entity, color: [f32; 4]) -> error::Result<()> {
-    use bevy::pbr::ExtendedMaterial;
-    use crate::particles::material::ParticlesMaterial;
     use crate::material::ProcessingMaterial;
+    use crate::particles::material::ParticlesMaterial;
     use crate::render::material::UntypedMaterial;
+    use bevy::pbr::ExtendedMaterial;
 
     type DefaultMat = ExtendedMaterial<StandardMaterial, ProcessingMaterial>;
 
@@ -1532,17 +1532,17 @@ pub fn material_set_albedo_color(entity: Entity, color: [f32; 4]) -> error::Resu
     })
 }
 
-/// Set the albedo source to a per-particle color buffer (`Float4` per slot,
+/// set the albedo source to a per-particle color buffer (`Float4` per slot,
 /// indexed by `mesh.tag`). Preserves all other `StandardMaterial` fields;
 /// `base_color` modulates the buffer color.
 pub fn material_set_albedo_buffer(
     entity: Entity,
     color_buffer_entity: Entity,
 ) -> error::Result<()> {
-    use bevy::pbr::ExtendedMaterial;
-    use crate::particles::material::{ParticlesExtension, ParticlesMaterial};
     use crate::material::ProcessingMaterial;
+    use crate::particles::material::{ParticlesExtension, ParticlesMaterial};
     use crate::render::material::UntypedMaterial;
+    use bevy::pbr::ExtendedMaterial;
 
     type DefaultMat = ExtendedMaterial<StandardMaterial, ProcessingMaterial>;
 
@@ -2044,7 +2044,7 @@ pub fn particles_create(capacity: u32, attribute_entities: Vec<Entity>) -> error
     })
 }
 
-/// Capacity = `geometry`'s vertex count. Builtin attributes (`position`,
+/// capacity = `geometry`'s vertex count. Builtin attributes (`position`,
 /// `normal`, `color`, `uv`) are seeded from the matching mesh attribute when
 /// formats line up; everything else is zero-initialized.
 pub fn particles_create_from_geometry(
@@ -2227,27 +2227,43 @@ pub fn particles_emit(
     })
 }
 
-/// Built-in noise kernel: displaces `position` by 3D value noise. Uniforms:
+/// built-in noise kernel: displaces `position` by 3d value noise. Uniforms:
 /// `scale: f32`, `strength: f32`, `time: f32`.
 pub fn particles_kernel_noise() -> error::Result<Entity> {
     let shader = shader_load(particles::kernels::NOISE_PATH)?;
     compute_create(shader)
 }
 
-/// Built-in transform kernel: scale → axis-angle rotate → translate on
+/// built-in transform kernel: scale → axis-angle rotate → translate on
 /// `position`. Uniforms: `translate: vec3`, `rotation_axis: vec3`,
 /// `rotation_angle: f32`, `scale: vec3`. Identity defaults are seeded.
 pub fn particles_kernel_transform() -> error::Result<Entity> {
     let shader = shader_load(particles::kernels::TRANSFORM_PATH)?;
     let entity = compute_create(shader)?;
-    compute_set(entity, "translate", shader_value::ShaderValue::Float3([0.0; 3]))?;
-    compute_set(entity, "rotation_axis", shader_value::ShaderValue::Float3([0.0, 1.0, 0.0]))?;
-    compute_set(entity, "rotation_angle", shader_value::ShaderValue::Float(0.0))?;
-    compute_set(entity, "scale", shader_value::ShaderValue::Float3([1.0, 1.0, 1.0]))?;
+    compute_set(
+        entity,
+        "translate",
+        shader_value::ShaderValue::Float3([0.0; 3]),
+    )?;
+    compute_set(
+        entity,
+        "rotation_axis",
+        shader_value::ShaderValue::Float3([0.0, 1.0, 0.0]),
+    )?;
+    compute_set(
+        entity,
+        "rotation_angle",
+        shader_value::ShaderValue::Float(0.0),
+    )?;
+    compute_set(
+        entity,
+        "scale",
+        shader_value::ShaderValue::Float3([1.0, 1.0, 1.0]),
+    )?;
     Ok(entity)
 }
 
-/// Dispatch `compute_entity` against the [`Particles`]'s buffers. Each buffer
+/// dispatch `compute_entity` against the [`Particles`]'s buffers. Each buffer
 /// is auto-bound by attribute name; undeclared bindings are skipped. Kernels
 /// must declare `@workgroup_size(64)`. Set uniforms via `compute_set` first.
 pub fn particles_apply(particles_entity: Entity, compute_entity: Entity) -> error::Result<()> {

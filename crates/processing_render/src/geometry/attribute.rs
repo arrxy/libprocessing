@@ -198,10 +198,8 @@ impl Attribute {
         }
     }
 
-    /// Like [`Self::from_builtin`] but with a friendly user-facing name.
-    /// `inner` is the underlying Bevy mesh attribute (used for mesh layout
-    /// matching); `name` is the identifier the user sees and that custom
-    /// shaders bind by.
+    /// like [`Self::from_builtin`], but with a user-facing `name` distinct
+    /// from `inner.name`. shaders bind by `name`.
     pub fn from_builtin_with_name(
         name: &'static str,
         inner: MeshVertexAttribute,
@@ -225,11 +223,11 @@ pub struct BuiltinAttributes {
     pub normal: Entity,
     pub color: Entity,
     pub uv: Entity,
-    /// Per-instance rotation as a quaternion `(x, y, z, w)`.
+    /// per-instance rotation as a quaternion `(x, y, z, w)`.
     pub rotation: Entity,
-    /// Per-instance scale `(x, y, z)`.
+    /// per-instance scale `(x, y, z)`.
     pub scale: Entity,
-    /// Per-particle lifecycle flag: `0.0` = alive, non-zero = dead.
+    /// per-particle lifecycle flag: `0.0` = alive, non-zero = dead.
     pub dead: Entity,
 }
 

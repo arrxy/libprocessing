@@ -3,7 +3,6 @@ use bevy::mesh::PrimitiveTopology;
 use bevy::prelude::*;
 use bevy::render::mesh::VertexAttributeValues;
 
-/// Ensure a mesh has vertex colors, inserting default white if missing.
 fn ensure_vertex_colors(mesh: &mut Mesh) {
     if mesh.attribute(Mesh::ATTRIBUTE_COLOR).is_none() {
         let vertex_count = mesh
@@ -91,7 +90,7 @@ pub fn tetrahedron_mesh(radius: f32) -> Mesh {
     mesh
 }
 
-/// 3D lattice of `nx * ny * nz` points, centered at the origin with `spacing` between them.
+/// 3d lattice of `nx * ny * nz` points, centered at the origin with `spacing` between them.
 pub fn grid_mesh(nx: u32, ny: u32, nz: u32, spacing: f32) -> Mesh {
     let count = (nx as usize) * (ny as usize) * (nz as usize);
     let mut positions = Vec::with_capacity(count);

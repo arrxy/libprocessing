@@ -1830,10 +1830,6 @@ pub extern "C" fn processing_material(window_id: u64, mat_id: u64) {
     error::check(|| graphics_record_command(window_entity, DrawCommand::Material(mat_entity)));
 }
 
-// Shader
-
-/// Create a shader from WGSL source.
-///
 /// # Safety
 /// - `source` must be non-null
 #[unsafe(no_mangle)]
@@ -1847,8 +1843,6 @@ pub unsafe extern "C" fn processing_shader_create(source: *const std::ffi::c_cha
     .unwrap_or(0)
 }
 
-/// Load a shader from a file path.
-///
 /// # Safety
 /// - `path` must be non-null
 #[unsafe(no_mangle)]
@@ -1868,8 +1862,6 @@ pub extern "C" fn processing_shader_destroy(shader_id: u64) {
     error::check(|| shader_destroy(Entity::from_bits(shader_id)));
 }
 
-// Buffer
-
 #[unsafe(no_mangle)]
 pub extern "C" fn processing_buffer_create(size: u64) -> u64 {
     error::clear_error();
@@ -1878,8 +1870,6 @@ pub extern "C" fn processing_buffer_create(size: u64) -> u64 {
         .unwrap_or(0)
 }
 
-/// Create a buffer initialized with data.
-///
 /// # Safety
 /// - `data` must point to `len` valid bytes
 #[unsafe(no_mangle)]
@@ -1891,8 +1881,6 @@ pub unsafe extern "C" fn processing_buffer_create_with_data(data: *const u8, len
         .unwrap_or(0)
 }
 
-/// Write data to a buffer.
-///
 /// # Safety
 /// - `data` must point to `len` valid bytes
 #[unsafe(no_mangle)]
@@ -1902,15 +1890,13 @@ pub unsafe extern "C" fn processing_buffer_write(buf_id: u64, data: *const u8, l
     error::check(|| buffer_write(Entity::from_bits(buf_id), bytes));
 }
 
-/// Returns the byte length of a buffer, or 0 if not found.
+/// returns the byte length of a buffer, or 0 if not found.
 #[unsafe(no_mangle)]
 pub extern "C" fn processing_buffer_size(buf_id: u64) -> u64 {
     error::clear_error();
     error::check(|| buffer_size(Entity::from_bits(buf_id))).unwrap_or(0)
 }
 
-/// Read buffer contents into a caller-provided buffer.
-///
 /// # Safety
 /// - `out` must be valid for writes of `out_len` bytes (may be null if
 ///   `out_len == 0`, in which case this acts as a size query).
@@ -1933,8 +1919,6 @@ pub extern "C" fn processing_buffer_destroy(buf_id: u64) {
     error::check(|| buffer_destroy(Entity::from_bits(buf_id)));
 }
 
-// Compute
-
 #[unsafe(no_mangle)]
 pub extern "C" fn processing_compute_create(shader_id: u64) -> u64 {
     error::clear_error();
@@ -1943,8 +1927,6 @@ pub extern "C" fn processing_compute_create(shader_id: u64) -> u64 {
         .unwrap_or(0)
 }
 
-/// Set a float property on a compute shader.
-///
 /// # Safety
 /// - `name` must be non-null
 #[unsafe(no_mangle)]

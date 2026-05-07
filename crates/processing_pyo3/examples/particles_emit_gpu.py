@@ -148,7 +148,7 @@ def setup():
         ],
     )
 
-    # Park unemitted slots until the spawn kernel fills them.
+    # park unemitted slots until the spawn kernel fills them.
     dead_buf = p.buffer(Attribute.dead())
     dead_buf.write([1.0] * CAPACITY)
 

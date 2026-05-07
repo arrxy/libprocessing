@@ -74,7 +74,7 @@ def setup():
         attributes=[position_attr, color_attr, scale_attr, dead_attr, age_attr],
     )
 
-    # Park unemitted slots until the spawn loop fills them.
+    # park unemitted slots until the spawn loop fills them.
     dead_buf = p.buffer(dead_attr)
     dead_buf.write([1.0] * capacity)
 

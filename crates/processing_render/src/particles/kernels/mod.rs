@@ -1,4 +1,4 @@
-//! Built-in compute kernels for [`Particles`](super::Particles), embedded as
+//! built-in compute kernels for [`Particles`](super::Particles), embedded as
 //! assets and dispatched via `particles_apply`.
 
 use bevy::asset::embedded_asset;
@@ -14,5 +14,4 @@ impl Plugin for ParticlesKernelsPlugin {
 }
 
 pub const NOISE_PATH: &str = "embedded://processing_render/particles/kernels/noise.wgsl";
-pub const TRANSFORM_PATH: &str =
-    "embedded://processing_render/particles/kernels/transform.wgsl";
+pub const TRANSFORM_PATH: &str = "embedded://processing_render/particles/kernels/transform.wgsl";

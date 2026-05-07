@@ -45,7 +45,6 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
 
     let seed = base + local_i;
 
-    // Random unit-disc direction with some upward bias.
     let theta = hash_unit(seed) * 6.2831853;
     let r     = sqrt(hash_unit(seed * 2u + 1u));
     let dirxz = vec2<f32>(cos(theta), sin(theta)) * r;
@@ -156,17 +155,19 @@ fn sketch() -> error::Result<()> {
         ],
     )?;
 
-    // Mark all unemitted slots dead so they don't render at origin.
-    let dead_buf = particles_buffer(p, dead_attr)?
-        .ok_or(error::ProcessingError::ParticlesNotFound)?;
-    let init_dead: Vec<u8> = (0..capacity)
-        .flat_map(|_| 1.0_f32.to_le_bytes())
-        .collect();
+    // mark all unemitted slots dead so they don't render at origin.
+    let dead_buf =
+        particles_buffer(p, dead_attr)?.ok_or(error::ProcessingError::ParticlesNotFound)?;
+    let init_dead: Vec<u8> = (0..capacity).flat_map(|_| 1.0_f32.to_le_bytes()).collect();
     buffer_write(dead_buf, init_dead)?;
 
-    let color_buf = particles_buffer(p, color_attr)?
-        .ok_or(error::ProcessingError::ParticlesNotFound)?;
-    let mat = { let m = material_create_pbr()?; material_set_albedo_buffer(m, color_buf)?; m };
+    let color_buf =
+        particles_buffer(p, color_attr)?.ok_or(error::ProcessingError::ParticlesNotFound)?;
+    let mat = {
+        let m = material_create_pbr()?;
+        material_set_albedo_buffer(m, color_buf)?;
+        m
+    };
 
     let spawn_shader = shader_create(SPAWN_SHADER)?;
     let spawn = compute_create(spawn_shader)?;
@@ -190,11 +191,13 @@ fn sketch() -> error::Result<()> {
         graphics_record_command(graphics, DrawCommand::Material(mat))?;
         graphics_record_command(
             graphics,
-            DrawCommand::Particles { particles: p, geometry: particle },
+            DrawCommand::Particles {
+                particles: p,
+                geometry: particle,
+            },
         )?;
         graphics_end_draw(graphics)?;
 
-        // orbit the spawn point in a small circle
         let t = start.elapsed().as_secs_f32();
         let sx = t.cos() * 0.4;
         let sz = t.sin() * 0.4;

@@ -370,7 +370,6 @@ impl Geometry {
         geometry_vertex_count(self.entity).map_err(|e| PyRuntimeError::new_err(format!("{e}")))
     }
 
-    /// Retained sphere mesh.
     #[staticmethod]
     #[pyo3(signature = (radius, sectors=32, stacks=18))]
     pub fn sphere(radius: f32, sectors: u32, stacks: u32) -> PyResult<Self> {
@@ -379,7 +378,6 @@ impl Geometry {
         Ok(Self { entity })
     }
 
-    /// Retained box mesh.
     #[staticmethod]
     pub fn r#box(width: f32, height: f32, depth: f32) -> PyResult<Self> {
         let entity = geometry_box(width, height, depth)
@@ -387,10 +385,8 @@ impl Geometry {
         Ok(Self { entity })
     }
 
-    /// 3D lattice of `nx * ny * nz` points centered at the origin, with
-    /// `spacing` units between adjacent points. Topology is `PointList` —
-    /// typically used as a position source for `Particles(geometry=...)` rather
-    /// than rasterized directly.
+    /// lattice centered at the origin; topology is `PointList`, intended as a
+    /// position source for `Particles(geometry=...)` rather than rasterized.
     #[staticmethod]
     #[pyo3(signature = (nx, ny, nz, spacing=1.0))]
     pub fn grid(nx: u32, ny: u32, nz: u32, spacing: f32) -> PyResult<Self> {

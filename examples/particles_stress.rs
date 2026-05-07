@@ -1,4 +1,4 @@
-//! Stress test with `GRID^3` PBR-lit cubes rotating. Tune `GRID` to scale.
+//! stress test with `GRID^3` pbr-lit cubes rotating. tune `GRID` to scale.
 
 use processing_glfw::GlfwContext;
 
@@ -6,7 +6,7 @@ use bevy::math::Vec3;
 use processing::prelude::*;
 use processing_render::render::command::DrawCommand;
 
-const GRID: u32 = 100; // GRID^3 = 1,000,000 particles
+const GRID: u32 = 100;
 const SPACING: f32 = 1.0;
 
 const SPIN_SHADER: &str = r#"
@@ -62,7 +62,6 @@ fn sketch() -> error::Result<()> {
     transform_look_at(graphics, Vec3::new(0.0, 0.0, 0.0))?;
     graphics_orbit_camera(graphics)?;
 
-    // R/G/B directional lights from the cardinal axes
     let red = light_create_directional(graphics, bevy::color::Color::srgb(1.0, 0.0, 0.0), 1000.0)?;
     transform_set_position(red, Vec3::new(1.0, 0.0, 0.0))?;
     transform_look_at(red, Vec3::ZERO)?;
@@ -98,10 +97,10 @@ fn sketch() -> error::Result<()> {
         colors.push(rz);
         colors.push(1.0);
     }
-    let position_buf = particles_buffer(p, position_attr)?
-        .ok_or(error::ProcessingError::ParticlesNotFound)?;
-    let color_buf = particles_buffer(p, color_attr)?
-        .ok_or(error::ProcessingError::ParticlesNotFound)?;
+    let position_buf =
+        particles_buffer(p, position_attr)?.ok_or(error::ProcessingError::ParticlesNotFound)?;
+    let color_buf =
+        particles_buffer(p, color_attr)?.ok_or(error::ProcessingError::ParticlesNotFound)?;
     buffer_write(
         position_buf,
         positions.iter().flat_map(|f| f.to_le_bytes()).collect(),
@@ -111,7 +110,11 @@ fn sketch() -> error::Result<()> {
         colors.iter().flat_map(|f| f.to_le_bytes()).collect(),
     )?;
 
-    let mat = { let m = material_create_pbr()?; material_set_albedo_buffer(m, color_buf)?; m };
+    let mat = {
+        let m = material_create_pbr()?;
+        material_set_albedo_buffer(m, color_buf)?;
+        m
+    };
     let spin_shader = shader_create(SPIN_SHADER)?;
     let spin = compute_create(spin_shader)?;
 
@@ -126,7 +129,10 @@ fn sketch() -> error::Result<()> {
         graphics_record_command(graphics, DrawCommand::Material(mat))?;
         graphics_record_command(
             graphics,
-            DrawCommand::Particles { particles: p, geometry: cube },
+            DrawCommand::Particles {
+                particles: p,
+                geometry: cube,
+            },
         )?;
         graphics_end_draw(graphics)?;
 

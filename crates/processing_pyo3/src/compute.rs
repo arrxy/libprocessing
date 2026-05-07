@@ -22,8 +22,7 @@ pub struct Buffer {
 }
 
 impl Buffer {
-    /// Wrap an existing buffer entity without taking ownership. `Drop` will
-    /// not destroy it.
+    /// borrowed wrapper: `Drop` will not destroy the underlying entity.
     pub(crate) fn from_entity(entity: Entity, element_type: Option<ShaderValue>) -> Self {
         let size = buffer_size(entity).unwrap_or(0);
         Self {
@@ -271,8 +270,6 @@ pub struct Compute {
 }
 
 impl Compute {
-    /// Wrap an existing compute entity (e.g., one created by a Rust-side
-    /// factory like `field_kernel_noise`). Not exposed to Python directly.
     pub(crate) fn from_entity(entity: Entity) -> Self {
         Self { entity }
     }

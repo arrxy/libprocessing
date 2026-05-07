@@ -55,7 +55,6 @@ pub(crate) fn py_to_shader_value(value: &Bound<'_, PyAny>) -> PyResult<shader_va
     )))
 }
 
-// dispatch `albedo=` by python type; may swap the backing asset
 fn apply_albedo(entity: Entity, value: &Bound<'_, PyAny>) -> PyResult<()> {
     if let Ok(buf) = value.extract::<PyRef<Buffer>>() {
         return material_set_albedo_buffer(entity, buf.entity)
@@ -63,8 +62,11 @@ fn apply_albedo(entity: Entity, value: &Bound<'_, PyAny>) -> PyResult<()> {
     }
     if let Ok(c) = value.extract::<PyRef<PyColor>>() {
         let srgba: bevy::color::Srgba = c.0.into();
-        return material_set_albedo_color(entity, [srgba.red, srgba.green, srgba.blue, srgba.alpha])
-            .map_err(|e| PyRuntimeError::new_err(format!("{e}")));
+        return material_set_albedo_color(
+            entity,
+            [srgba.red, srgba.green, srgba.blue, srgba.alpha],
+        )
+        .map_err(|e| PyRuntimeError::new_err(format!("{e}")));
     }
     if let Ok(rgba) = value.extract::<[f32; 4]>() {
         return material_set_albedo_color(entity, rgba)
@@ -95,7 +97,6 @@ fn apply_kwargs(entity: Entity, kwargs: &Bound<'_, PyDict>) -> PyResult<()> {
 
 #[pymethods]
 impl Material {
-    /// No args: default PBR. With `shader`: custom material. Kwargs are applied via `set`.
     #[new]
     #[pyo3(signature = (shader=None, **kwargs))]
     pub fn new(shader: Option<&Shader>, kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<Self> {
@@ -112,7 +113,6 @@ impl Material {
         Ok(Self { entity })
     }
 
-    /// PBR-lit material. `albedo` accepts a `Color` or a per-particle `Buffer`.
     #[staticmethod]
     #[pyo3(signature = (**kwargs))]
     pub fn pbr(kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<Self> {
@@ -123,7 +123,6 @@ impl Material {
         Ok(Self { entity })
     }
 
-    /// Like `pbr` but skips lighting; albedo is the final output color.
     #[staticmethod]
     #[pyo3(signature = (**kwargs))]
     pub fn unlit(kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<Self> {
@@ -136,7 +135,6 @@ impl Material {
         Ok(Self { entity })
     }
 
-    /// Set material properties. `albedo` may swap the backing asset; other fields are preserved.
     #[pyo3(signature = (**kwargs))]
     pub fn set(&self, kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<()> {
         let Some(kwargs) = kwargs else {

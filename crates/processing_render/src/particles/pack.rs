@@ -1,5 +1,5 @@
-//! Compute pass that writes [`Particles`] position/rotation/scale/dead into
-//! the per-instance slots reserved by [`GpuBatchedMesh3d`]. Pipelines are
+//! compute pass that writes [`Particles`] position/rotation/scale/dead into
+//! the per-instance slots reserved by [`GpuBatchedMesh3d`]. pipelines are
 //! cached per `(HAS_ROTATION, HAS_SCALE, HAS_DEAD)` shader_def combination.
 
 use std::num::NonZeroU64;
@@ -66,7 +66,7 @@ impl Plugin for ParticlesPackPlugin {
 #[derive(Resource, Clone)]
 pub struct ParticlesPackShader(pub Handle<Shader>);
 
-/// Specialization key — controls which `#ifdef`s are set when compiling the pack shader,
+/// specialization key — controls which `#ifdef`s are set when compiling the pack shader,
 /// and which bindings are present in the bind-group layout.
 #[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
 pub struct PackPipelineKey {
@@ -297,10 +297,7 @@ fn prepare_pack_bind_groups(
         let Some(gpu_position) = gpu_buffers.get(&data.position) else {
             continue;
         };
-        let gpu_rotation = data
-            .rotation
-            .as_ref()
-            .and_then(|h| gpu_buffers.get(h));
+        let gpu_rotation = data.rotation.as_ref().and_then(|h| gpu_buffers.get(h));
         if data.key.has_rotation && gpu_rotation.is_none() {
             continue;
         }

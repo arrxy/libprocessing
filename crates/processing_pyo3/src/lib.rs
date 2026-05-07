@@ -12,7 +12,6 @@ pub(crate) mod color;
 pub(crate) mod compute;
 #[cfg(feature = "cuda")]
 pub(crate) mod cuda;
-pub(crate) mod particles;
 mod glfw;
 mod gltf;
 mod graphics;
@@ -21,6 +20,7 @@ pub(crate) mod material;
 pub(crate) mod math;
 mod midi;
 mod monitor;
+pub(crate) mod particles;
 pub(crate) mod shader;
 mod surface;
 mod time;
@@ -332,15 +332,7 @@ mod mewnala {
     #[pymodule_export]
     use super::Buffer;
     #[pymodule_export]
-    use super::color::PyColor;
-    #[pymodule_export]
     use super::Compute;
-    #[pymodule_export]
-    use super::particles::Attribute;
-    #[pymodule_export]
-    use super::particles::AttributeFormat;
-    #[pymodule_export]
-    use super::particles::Particles;
     #[pymodule_export]
     use super::Geometry;
     #[pymodule_export]
@@ -354,6 +346,19 @@ mod mewnala {
     #[pymodule_export]
     use super::Material;
     #[pymodule_export]
+    use super::PyBlendMode;
+    #[pymodule_export]
+    use super::Sampler;
+    #[pymodule_export]
+    use super::Shader;
+    #[pymodule_export]
+    use super::Topology;
+    #[pymodule_export]
+    use super::color::PyColor;
+    #[cfg(feature = "cuda")]
+    #[pymodule_export]
+    use super::cuda::CudaImage;
+    #[pymodule_export]
     use super::math::PyQuat;
     #[pymodule_export]
     use super::math::PyVec2;
@@ -362,18 +367,13 @@ mod mewnala {
     #[pymodule_export]
     use super::math::PyVec4;
     #[pymodule_export]
-    use super::PyBlendMode;
-    #[pymodule_export]
-    use super::Sampler;
-    #[pymodule_export]
-    use super::Shader;
-    #[pymodule_export]
-    use super::Topology;
-    #[cfg(feature = "cuda")]
-    #[pymodule_export]
-    use super::cuda::CudaImage;
-    #[pymodule_export]
     use super::monitor::Monitor;
+    #[pymodule_export]
+    use super::particles::Attribute;
+    #[pymodule_export]
+    use super::particles::AttributeFormat;
+    #[pymodule_export]
+    use super::particles::Particles;
     #[pymodule_export]
     use super::surface::Surface;
 
@@ -1350,7 +1350,6 @@ mod mewnala {
             }
         }
     }
-
 
     #[pyfunction]
     #[pyo3(pass_module, signature = (*args))]
