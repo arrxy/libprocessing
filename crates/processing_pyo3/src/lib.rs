@@ -121,12 +121,10 @@ pub(crate) fn reset_tracked_globals() {
 fn sync_globals(module: &Bound<'_, PyModule>, globals: &Bound<'_, PyAny>) -> PyResult<()> {
     let graphics =
         get_graphics(module)?.ok_or_else(|| PyRuntimeError::new_err("call size() first"))?;
-    // let width = ::processing::prelude::surface_logical_width(graphics.surface.entity)
-    //     .map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
-    // let height = ::processing::prelude::surface_logical_height(graphics.surface.entity)
-    //     .map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
-    let width = graphics.width;
-    let height = graphics.height;
+    let width = ::processing::prelude::surface_logical_width(graphics.surface.entity)
+        .map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
+    let height = ::processing::prelude::surface_logical_height(graphics.surface.entity)
+        .map_err(|e| PyRuntimeError::new_err(format!("{e}")))?;
     input::sync_globals(globals, graphics.surface.entity, width, height)?;
     surface::sync_globals(globals, &graphics.surface, width, height)?;
     time::sync_globals(globals)?;

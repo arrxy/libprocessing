@@ -403,14 +403,6 @@ pub fn resize(
     let width = width.max(1);
     let height = height.max(1);
 
-    // let Ok(window) = windows.get_mut(window_entity) else {
-    //     return Ok(());
-    // };
-    //
-    // if window.mode != WindowMode::Windowed {
-    //     return Ok(());
-    // }
-
     if let Ok(mut window) = windows.get_mut(window_entity) {
         let scale = window.resolution.scale_factor();
         let physical_w = (width as f32 * scale) as u32;
@@ -420,16 +412,16 @@ pub fn resize(
             .set_physical_resolution(physical_w, physical_h);
     }
 
-    // for (target, mut surface_size, mut projection) in graphics_query.iter_mut() {
-    //     if let RenderTarget::Window(WindowRef::Entity(surface)) = *target {
-    //         if surface == window_entity {
-    //             *surface_size = SurfaceSize(width, height);
-    //             if let Projection::Custom(ref mut custom) = *projection {
-    //                 custom.update(width as f32, height as f32);
-    //             }
-    //         }
-    //     }
-    // }
+    for (target, mut surface_size, mut projection) in graphics_query.iter_mut() {
+        if let RenderTarget::Window(WindowRef::Entity(surface)) = *target {
+            if surface == window_entity {
+                *surface_size = SurfaceSize(width, height);
+                if let Projection::Custom(ref mut custom) = *projection {
+                    custom.update(width as f32, height as f32);
+                }
+            }
+        }
+    }
     Ok(())
 }
 
