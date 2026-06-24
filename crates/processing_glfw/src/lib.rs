@@ -301,14 +301,8 @@ impl GlfwContext {
                     input_set_focus(surface, focused).unwrap();
                 }
                 WindowEvent::Size(width, height) => {
-                    let scale = self.content_scale();
-                    let logical_w = ((width as f32) / scale).max(1.0) as i32;
-                    let logical_h = ((height as f32) / scale).max(1.0) as i32;
-                    processing_render::surface_resize(
-                        surface,
-                        logical_w as u32,
-                        logical_h as u32,
-                    ).unwrap();
+                    processing_render::surface_resize(surface, width.max(1) as u32, height.max(1) as u32)
+                        .unwrap();
                 }
                 _ => {}
             }
@@ -539,8 +533,8 @@ fn read_desired_window(surface: Entity) -> Option<DesiredWindow> {
                 _ => None,
             },
             size: bevy::math::UVec2::new(
-                window.resolution.physical_width(),
-                window.resolution.physical_height(),
+                window.resolution.width() as u32,
+                window.resolution.height() as u32,
             ),
             visible: window.visible,
             resizable: window.resizable,

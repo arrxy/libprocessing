@@ -21,7 +21,7 @@
 use bevy::{
     app::{App, Plugin},
     asset::Assets,
-    camera::{CameraProjection, Projection, RenderTarget},
+    camera::{Projection, RenderTarget},
     ecs::query::QueryEntityError,
     math::{IRect, IVec2},
     prelude::{Commands, Component, Entity, In, Query, ResMut, Window, With, default},
@@ -41,7 +41,7 @@ use processing_core::error::{self, ProcessingError, Result};
 use std::ptr::NonNull;
 
 use crate::{
-    graphics::{ProcessingProjection, SurfaceSize},
+    graphics::SurfaceSize,
     image::Image,
 };
 
@@ -400,9 +400,6 @@ pub fn resize(
     mut windows: Query<&mut Window>,
     mut graphics_query: Query<(&RenderTarget, &mut SurfaceSize, &mut Projection)>,
 ) -> Result<()> {
-    let width = width.max(1);
-    let height = height.max(1);
-
     if let Ok(mut window) = windows.get_mut(window_entity) {
         let scale = window.resolution.scale_factor();
         let physical_w = (width as f32 * scale) as u32;
